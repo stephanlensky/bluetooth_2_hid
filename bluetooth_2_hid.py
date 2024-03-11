@@ -41,7 +41,8 @@ from libs import keyboard
 
 # Constants
 #=======================================================================================================================
-u_INPUT_DEV = u'/dev/input/event0'   # In the Raspberry Pi Zero (apparently)
+# note: event0 is something related to HDMI
+u_INPUT_DEVICE_NAME = u'Keychron K8 Pro Keyboard'
 u_OUTPUT_DEV = u'/dev/hidg0'
 u_LOG_FILE = u'/tmp/blu2hid.log'
 
@@ -58,8 +59,8 @@ def _get_cmd_args():
     o_parser = argparse.ArgumentParser()
     o_parser.add_argument('-i',
                           action='store',
-                          default=u_INPUT_DEV,
-                          help='Input device (Bluetooth Keyboard). By default it\'s "/dev/input/event0"')
+                          default=u_INPUT_DEVICE_NAME,
+                          help='Input device name (Bluetooth Keyboard).')
     o_parser.add_argument('-o',
                           action='store',
                           default=u_OUTPUT_DEV,
@@ -136,11 +137,14 @@ def _get_input_device(pu_device):
 
     o_device = None
     while o_device is None:
-        try:
-            o_device = evdev.InputDevice(pu_device)
-        except OSError:
-            print('[ WAIT ] Opening Bluetooth input (%s)...' % u_INPUT_DEV)
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        selected = [device for device in devices if device.name == pu_device]
+        if not selected:
+            print('[ WAIT ] Opening Bluetooth input (%s)...' % pu_device)
             time.sleep(3)
+            continue
+
+        o_device = selected[0]
 
     print('[ pass ] Bluetooth input open (%s)' % str(pu_device))
     return o_device
@@ -232,14 +236,21 @@ if __name__ == '__main__':
                             s_hid_command = o_hid_keyboard.to_hid_command()
                             try:
                                 o_output_device.write(s_hid_command.encode('utf-8'))
-                            except IOError:
+                            except IOError as e:
                                 print('--------------------------------------------------')
-                                _get_output_device(o_args['u_output'])
+                                print('Error writing to output device: ', e)
+                                o_output_device = _get_output_device(o_args['u_output'])
+                                # retry once
+                                try:
+                                    o_output_device.write(s_hid_command.encode('utf-8'))
+                                    print("Succeeded on retry")
+                                except IOError:
+                                    pass
                                 print('--------------------------------------------------')
-                                o_output_device.write(s_hid_command.encode('utf-8'))
 
         # The o_input_device cannot be read
-        except IOError:
+        except IOError as e:
             print('--------------------------------------------------')
+            print('Error reading from input device: ', e)
             o_input_device = _get_input_device(o_args['u_input'])
             print('--------------------------------------------------')
