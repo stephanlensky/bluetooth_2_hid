@@ -140,7 +140,10 @@ def _get_input_device(pu_device):
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
         selected = [device for device in devices if device.name == pu_device]
         if not selected:
-            print('[ WAIT ] Opening Bluetooth input (%s)...' % pu_device)
+            print(
+                '[ WAIT ] Opening Bluetooth input (%s)... currerntly available devices: ' % pu_device,
+                [device.name for device in devices]
+            )
             time.sleep(3)
             continue
 
@@ -161,7 +164,8 @@ def _get_output_device(pu_device):
     while o_device is None:
         try:
             o_device = open(pu_device, 'wb+', buffering=0)
-        except OSError:
+        except OSError as e:
+            print('Error opening HID output: ', e)
             print('[ WAIT ] Opening HID output (%s)...' % u_OUTPUT_DEV)
             time.sleep(3)
 
