@@ -141,7 +141,7 @@ def _get_input_device(pu_device):
         selected = [device for device in devices if device.name == pu_device]
         if not selected:
             print(
-                '[ WAIT ] Opening Bluetooth input (%s)... currerntly available devices: ' % pu_device,
+                '[ WAIT ] Opening Bluetooth input (%s)... currently available devices: ' % pu_device,
                 [device.name for device in devices]
             )
             time.sleep(3)
