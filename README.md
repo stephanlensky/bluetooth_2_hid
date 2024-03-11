@@ -1,3 +1,5 @@
+*Note: this fork has some modifications for my personal use. Not intended for use by others, but feel free to take a look.*
+
 # Bluetooth to HID
 
 ![License image.](images/diagram.png)
@@ -15,7 +17,7 @@ or operating system select menu (GRUB)? or an old device that accepts USB keyboa
 
 To solve those issues, we will use a Raspberry Pi Zero W (it's important that it's the **W** model because it has a
 Bluetooth receiver) as an intermediary to convert the Bluetooth commands from the keyboard to plain HID (Human Interface
-Device) instructions sent through the USB port. 
+Device) instructions sent through the USB port.
 
 
 ## Usage
@@ -39,9 +41,9 @@ Device) instructions sent through the USB port.
      to your children about the dangers of learning to code... you know, the typical stuff). We need to check that the
      keyboard is able to automatically re-connect after entering energy saving mode. If it does, CONGRATULATIONS!
   7. To automate everything at startup, run the `sudo install.sh`. It will end by with a reboot.
-     
+
 ## Known bugs
- 
+
 If the keyboard enters energy saving mode, it stops being detected by the Raspberry and the input device
 `/dev/input/event0` is no longer available, making the script to crash.
 
@@ -52,12 +54,12 @@ If you succeed setting your Raspberry Pi Zero W as a HID proxy for your Bluetoot
   1. Set Raspbian as read-only. That will help preventing the SD card from getting corrupted when powering off the
      Raspberry. Remember we won't properly shut down the Pi, we'll simply cut its power when shutting down your PC. If
      that happens while the Pi is writing any file, the entire system could get corrupted.
-     
+
   2. During the configuration of the Raspberry Pi we would access it through SSH over WiFi network connection. Those
      services require a lot of time to start when powering up the Pi (around 12 seconds). That means that you could
      never access the BIOS of your computer with this setup because it's likely the system is not yet ready to execute
      our Bluetooth-to-HID script.
-     
+
   3. **VERY IMPORTANT:** Once everything is working, make a backup of the Pi's SD card. You don't want to repeat all the
      setup if anything fails, do you? **;)**
 
